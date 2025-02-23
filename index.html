@@ -22,7 +22,7 @@
     <script>
         async function classifyImage(imageBase64) {
             try {
-                const response = await fetch("https://stepur-which-planet.hf.space/api/predict/", {
+                const response = await fetch("https://stepur-which-planet.hf.space/gradio_api/call/predict/", {
                     method: "POST",
                     body: JSON.stringify({ "data": [imageBase64] }),
                     headers: { "Content-Type": "application/json" }
