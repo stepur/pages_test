@@ -1,0 +1,37 @@
+---
+title: 1. Single file
+layout: page
+---
+
+<input id="photo" type="file">
+<div id="results"></div>
+
+<script type="module">
+  import { Client } from "@gradio/client"; // Import Gradio Client
+
+  async function loaded(reader) {
+    // Create Gradio Client instance for your model
+    const client = await Client.connect("stepur/which_planet");
+
+    // Convert the image file to a Blob
+    const response = await fetch(reader.result);
+    const imageBlob = await response.blob();
+
+    // Send the image to the Gradio model
+    const result = await client.predict("/predict", { img: imageBlob });
+
+    // Extract the classification result
+    const label = result.data; // Adjust this if the API returns a nested object
+
+    // Display the result
+    results.innerHTML = `<br/><img src="${reader.result}" width="300"> <p>${label}</p>`;
+  }
+
+  function read() {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => loaded(reader));
+    reader.readAsDataURL(photo.files[0]);
+  }
+
+  photo.addEventListener('input', read);
+</script>
