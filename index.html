@@ -1,1 +1,58 @@
-<H1>Hello World!!!</H1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Classifier</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        #results img { margin-top: 20px; max-width: 300px; }
+    </style>
+    <script type="module">
+        import { Client } from "@gradio/client"; // Import Gradio client
+
+        async function classifyImage(reader) {
+            try {
+                // Connect to the Hugging Face Spaces API
+                const client = await Client.connect("stepur/which_planet");
+
+                // Convert Base64 data URL to a Blob (required by Gradio)
+                const response = await fetch(reader.result);
+                const imageBlob = await response.blob();
+
+                // Send image to API for classification
+                const result = await client.predict("/predict", { img: imageBlob });
+
+                // Display the result
+                document.getElementById("results").innerHTML = `
+                    <h3>Prediction: ${result.data}</h3>
+                    <img src="${reader.result}" alt="Uploaded Image">
+                `;
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("results").innerHTML = "<p style='color:red;'>Failed to classify the image.</p>";
+            }
+        }
+
+        function handleFileUpload() {
+            const fileInput = document.getElementById("photo");
+            if (fileInput.files.length === 0) return;
+
+            const reader = new FileReader();
+            reader.onload = () => classifyImage(reader);
+            reader.readAsDataURL(fileInput.files[0]); // Convert file to Base64 URL
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Planet Classifier</h1>
+    <p>Upload an image of a planet to classify it.</p>
+
+    <input id="photo" type="file" accept="image/*">
+    <button onclick="handleFileUpload()">Classify</button>
+
+    <div id="results"></div>
+
+</body>
+</html>
