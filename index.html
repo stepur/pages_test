@@ -8,25 +8,33 @@
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         #results img { margin-top: 20px; max-width: 300px; }
     </style>
-    <script type="module">
-        import { Client } from "@gradio/client"; // Import Gradio client
+</head>
+<body>
 
-        async function classifyImage(reader) {
+    <h1>Planet Classifier</h1>
+    <p>Upload an image of a planet to classify it.</p>
+
+    <input id="photo" type="file" accept="image/*">
+    <button onclick="handleFileUpload()">Classify</button>
+
+    <div id="results"></div>
+
+    <script>
+        async function classifyImage(imageBase64) {
             try {
-                // Connect to the Hugging Face Spaces API
-                const client = await Client.connect("stepur/which_planet");
+                const response = await fetch("https://stepur-which-planet.hf.space/api/predict/", {
+                    method: "POST",
+                    body: JSON.stringify({ "data": [imageBase64] }),
+                    headers: { "Content-Type": "application/json" }
+                });
 
-                // Convert Base64 data URL to a Blob (required by Gradio)
-                const response = await fetch(reader.result);
-                const imageBlob = await response.blob();
-
-                // Send image to API for classification
-                const result = await client.predict("/predict", { img: imageBlob });
+                const result = await response.json();
+                const label = result.data[0].confidences[0].label; // Extract classification result
 
                 // Display the result
                 document.getElementById("results").innerHTML = `
-                    <h3>Prediction: ${result.data}</h3>
-                    <img src="${reader.result}" alt="Uploaded Image">
+                    <h3>Prediction: ${label}</h3>
+                    <img src="${imageBase64}" alt="Uploaded Image">
                 `;
             } catch (error) {
                 console.error("Error:", error);
@@ -39,20 +47,10 @@
             if (fileInput.files.length === 0) return;
 
             const reader = new FileReader();
-            reader.onload = () => classifyImage(reader);
-            reader.readAsDataURL(fileInput.files[0]); // Convert file to Base64 URL
+            reader.onload = () => classifyImage(reader.result); // Pass Base64 image to API
+            reader.readAsDataURL(fileInput.files[0]); 
         }
     </script>
-</head>
-<body>
-
-    <h1>Planet Classifier</h1>
-    <p>Upload an image of a planet to classify it.</p>
-
-    <input id="photo" type="file" accept="image/*">
-    <button onclick="handleFileUpload()">Classify</button>
-
-    <div id="results"></div>
 
 </body>
 </html>
