@@ -28,17 +28,19 @@
                     headers: { "Content-Type": "application/json" }
                 });
 
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const result = await response.json();
-                console.log("API Response:", result); // Debugging output
-
-                if (!result || !result.data) {
-                    throw new Error("Unexpected API response format");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
-                const label = result.data[0]; // Extract classification label (adjust if needed)
+                const result = await response.json();
+                console.log("Full API Response:", result); // Log the full API response
 
+                // Ensure 'result.data' exists before accessing it
+                if (!result || !result.data) {
+                    throw new Error("Unexpected API response format. Check API response in console.");
+                }
+
+                const label = result.data[0]; // Adjust this if API structure is different
                 document.getElementById("results").innerHTML = `
                     <h3>Prediction: ${label}</h3>
                     <img src="${imageBase64}" alt="Uploaded Image">
@@ -46,8 +48,9 @@
             } catch (error) {
                 console.error("Error:", error);
                 document.getElementById("results").innerHTML = "<p style='color:red;'>Failed to classify the image.</p>";
-            }
-        }
+    }
+}
+
 
         function handleFileUpload() {
             const fileInput = document.getElementById("photo");
