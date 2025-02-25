@@ -65,7 +65,7 @@
                 await new Promise(resolve => setTimeout(resolve, delay));
 
                 // ✅ Use the correct polling API URL
-                const response = await fetch(`https://stepur-which-planet.hf.space/queue/status/${eventId}`);
+                const response = await fetch(`https://stepur-which-planet.hf.space/gradio_api/predict/${eventId}`);
 
                 if (!response.ok) {
                     console.error(`Polling failed (Attempt ${attempt + 1}): HTTP ${response.status}`);
